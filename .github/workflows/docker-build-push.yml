@@ -2,44 +2,11 @@ name: Docker CI/CD Pipeline
 
 on:
   push:
-    branches: [ dev, staging, main, master ]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
-  dev:
-    if: github.ref == 'refs/heads/dev'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build Docker image (dev)
-        run: docker build -t ${{ secrets.DOCKER_REPO }}:dev .
-
-      - name: Push image (dev)
-        run: docker push ${{ secrets.DOCKER_REPO }}:dev
-
-  staging:
-    if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build Docker image (staging)
-        run: docker build -t ${{ secrets.DOCKER_REPO }}:staging .
-
-      - name: Push image (staging)
-        run: docker push ${{ secrets.DOCKER_REPO }}:staging
-
   production:
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
