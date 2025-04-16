@@ -2,11 +2,8 @@ name: Docker CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - dev
-      - staging
-      - main
-      - master
+    branches: [ dev, staging, main, master ]
+  workflow_dispatch:
 
 jobs:
   dev:
