@@ -3,20 +3,64 @@ name: Docker CI/CD Pipeline
 on:
   push:
     branches:
+      - dev
+      - staging
       - main
+      - master
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
-  production:
+  dev:
+    if: github.ref == 'refs/heads/dev'
+    name: Build and Push Dev Image
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
 
-      - name: Build Docker image (production)
-        run: docker build -t ${{ secrets.DOCKER_REPO }}:latest .
+      - name: Build Docker Image (Dev)
+        run: docker build -t $IMAGE_NAME:dev .
 
-      - name: Push image (production)
-        run: docker push ${{ secrets.DOCKER_REPO }}:latest
+      - name: Push Docker Image (Dev)
+        run: docker push $IMAGE_NAME:dev
+
+  staging:
+    if: github.ref == 'refs/heads/staging'
+    name: Build and Push Staging Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+      - name: Build Docker Image (Staging)
+        run: docker build -t $IMAGE_NAME:staging .
+
+      - name: Push Docker Image (Staging)
+        run: docker push $IMAGE_NAME:staging
+
+  production:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    name: Build and Push Production Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+      - name: Build Docker Image (Production)
+        run: docker build -t $IMAGE_NAME:latest .
+
+      - name: Push Docker Image (Production)
+        run: docker push $IMAGE_NAME:latest
